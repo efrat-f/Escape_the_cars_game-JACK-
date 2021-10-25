@@ -1,0 +1,37 @@
+/**
+* Represents a linked list node of cars.
+*/
+class ListCar {
+    field Car car;          // a list consists of a data field,
+    field ListCar next;         // followed by a list
+
+    /* Creates a list node. */
+    constructor ListCar new(int Acar, ListCar cdr) {
+
+        //assigment
+        let car = Acar;
+        let next = cdr;
+        
+        return this;
+    }
+
+    /** Accessors. */
+    method int getCar() { return car; }
+    method int getNext() { return next; }
+    method void setNext(CarNode Anext) { 
+        let next = Anext;
+        return;
+    }
+
+    /** 
+    * Disposes this node. 
+    */
+    method void dispose() {
+        if(~(car = null)){
+            do car.dispose();
+        }
+        // Uses an OS routine to recycle this object.
+        do Memory.deAlloc(this);
+        return;
+    }
+}

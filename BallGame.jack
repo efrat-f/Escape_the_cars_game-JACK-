@@ -1,0 +1,208 @@
+class BallGame {
+
+   field Ball ball; // the ball of this game
+   field int length, width, x, y, score, xScore, yScore;
+   field ListCar topNode, currentNode; // top of link list of list car and pointer of the link list
+   field Random random; //random obj
+
+   /** Constructs a new Ball Game. 
+   * Give coordinates, width and length of ball game board and Coordinates to write score
+   */
+   constructor BallGame new(int Ax, int Ay, int Awidth, int Alength, int AyScore, int AxScore) {
+      var int sizeBall;
+      
+      //assigments
+      let length = Alength;
+      let width = Awidth;
+      let x = Ax;
+      let y = Ay;
+      let xScore = AxScore;
+      let yScore = AyScore;
+      let score = 0;
+      
+      // Creates 3 lanes and a ball according to board size and positions it at the middle lane
+      // of the road.
+      let sizeBall = length/3 - 15;
+      let ball = Ball.new(2, sizeBall/2, length/3 + sizeBall/4 + Ax, length/2 + Ay);
+      do ball.draw();
+      do Screen.setColor(true);
+      do Screen.drawLine(x, y+(length/3), x + width, y+(length/3));
+      do Screen.drawLine(x, y+(length/3*2), x + width, y+(length/3*2));
+      
+      //Initializing top link car list at null params
+      let topNode = ListCar.new(null,null);
+      
+      let currentNode = topNode;
+      return this;
+   }
+
+   /** 
+   * Disposes this ball game. 
+   */
+   method void dispose() {
+
+      //Dispose all car list
+      var ListCar currentNode1, tmpNode;
+      let currentNode1 = topNode;
+      while (~(currentNode1 = null)) {
+         let tmpNode = currentNode1;
+         let currentNode1 = currentNode1.getNext();
+         do tmpNode.dispose();
+      }
+
+      do ball.dispose();
+
+      //Uses an OS routine to recycle this object.
+      do Memory.deAlloc(this);
+      return;
+   }
+
+   /** 
+   * Moves the ball lane according to direction.
+   * param: direction
+   */
+   method void moveBall(int direction) {
+      if (direction = 131) { do ball.moveUp(length/3); }
+      if (direction = 133) { do ball.moveDown(length/3); }
+      return;
+   }
+
+   /**
+   * Moves cars left, return false
+   * If car exceeding from board removes it from link car list and increases the score
+   * if car run over the ball return true(check their coordinates)
+   */
+   method boolean moveCars(){
+      var ListCar currentNode1, tmpNode, tmp2Node;
+      var Car currentCar;
+      var boolean removeCar;
+      if (~(topNode.getNext() = null)){
+         let currentNode1 =  topNode.getNext();
+         let tmpNode = topNode;
+
+         //Goes through the whole link car list
+         while(~(currentNode1 = null)){
+            let currentCar = currentNode1.getCar();
+            let removeCar = currentCar.moveLeft();
+
+            //ball runed over
+            if (currentCar.getX() < (ball.getX() + ball.getSize()) & currentCar.getNativ() = ball.getNativ()){
+               return true;
+            }
+
+            //car exceeding- remove it and increases the score
+            if (removeCar){
+
+               //remove car
+               let tmp2Node = currentNode1.getNext();
+               do tmpNode.setNext(tmp2Node);
+               do currentNode1.dispose();
+               let currentNode1 = tmp2Node;
+               
+               //increases the score and print it
+               let score = score + 10;
+               do Output.moveCursor(yScore, xScore + 7);
+               do Output.printInt(score);
+
+            }else{
+               let tmpNode = currentNode1;
+               let currentNode1 = currentNode1.getNext();
+            }
+         }
+         let currentNode = tmpNode;
+      }else{
+         let currentNode = topNode;
+      }
+      return false;
+   }
+
+   /**
+   * Add car to link car list, positions it randomaly
+   */
+   method void addCar(){
+      var Car tmpCar;
+      var ListCar tmpListCar;
+      var int nativ;
+      let nativ = random.randRange(2);
+      let tmpCar = Car.new(x + width -70, y + ((length/3) * nativ) + 5, nativ+1);
+      do tmpCar.draw();
+      let tmpListCar = ListCar.new(tmpCar ,null);
+      do currentNode.setNext(tmpListCar);
+      let currentNode = currentNode.getNext();
+      return;
+   }
+
+   /**
+   * Get speed game and number of cars
+   * Runs the game: 
+   * Handles the user's inputs and moves the ball accordingly
+   * Moves the cars according to speed
+   * after some cars(AnumCar) the game finished
+   * return false at failtur, else true
+   */
+   method boolean run(int Aspeed, int AnumCars) {
+      var char key;  // the key currently pressed by the user
+      var boolean exit; // handel game sucsses/fail(ball run over)
+      var int i, j, numCar, speed;
+      let i = 0;
+      let j = 0;
+      let numCar = 0;
+      let speed = Aspeed;
+      let exit = false;
+
+      //print start score
+      do Output.moveCursor(yScore, xScore);
+      do Output.printString("score:     ");
+      do Output.moveCursor(yScore, xScore + 7);
+      do Output.printInt(score);
+
+      while (~exit) {
+
+         // waits for a key to be pressed
+         while (key = 0 & (~exit)) {
+            let i = i + 1;
+            let exit = moveCars();
+            let key = Keyboard.keyPressed();
+            
+            //manager speed and adding cars
+            do Sys.wait(speed);
+            if(i = 100){
+               let i = 0;
+               let j = j + 1;
+            }
+            if(j = speed){
+               if (numCar = AnumCars){
+                  return true;
+               }
+               let numCar = numCar + 1;
+               let j = 0;
+               do addCar();
+            }
+         }
+
+         do moveBall(key);
+
+         // waits for the key to be released
+         while (~(key = 0) & (~exit)) {
+            let key = Keyboard.keyPressed();
+            let exit = moveCars();
+            
+            //manager speed and adding cars
+            do Sys.wait(speed);
+            if(i = 100){
+               let i = 0;
+               let j = j+1;
+            }
+            if(j = speed){
+               if (numCar = AnumCars){
+                  return true;
+               }
+               let numCar = numCar + 1;
+               let j = 0;
+               do addCar();
+            }
+         }
+      }
+      return false;
+   }
+}

@@ -1,0 +1,108 @@
+class Ball {
+   field int x, y, size, nativ; // screen location of the ball's center
+
+   /** 
+   * Constructs a new ball with a given location and size.
+   * Get current lane
+   */
+   constructor Ball new(int Anativ, int Asize, int Ax, int Ay) {
+      
+      //assigment
+      let x = Ax;
+      let y = Ay;
+      let size = Asize;
+      let nativ = Anativ;
+      
+      return this;
+   }
+
+   /** Accessors. */
+   method int getX() {return x;}
+   method int getNativ() { return nativ;}
+   method int getY() { return y;}
+   method int getSize() { return size; }
+
+   /**
+   * Disposes this ball. 
+   */
+   method void dispose() {
+      do erase();
+
+      //Uses an OS routine to recycle this object.
+      do Memory.deAlloc(this);
+      return;
+   }
+
+   /**
+   * Draws the ball on the screen. 
+   */
+   method void draw() {
+      do Screen.setColor(true);
+      do Screen.drawCircle(x, y, size);
+      return;
+   }
+
+   /**
+   * Erases the ball from the screen. 
+   */
+   method void erase() {
+      do Screen.setColor(false);
+      do Screen.drawCircle(x, y, size);
+      return;
+   }
+
+   /** 
+   * Moves the ball down by size pixels(going down a lane) only if not exceed.
+   */
+   method void moveDown(int size) {
+      if (nativ < 3) {
+         do erase();
+         let y = y  + size;
+         do draw();
+         let nativ = nativ + 1;
+      }
+      return;
+   }
+
+   /** 
+    * Moves the ball up by size pixels(Going up a lane) only if not exceed. 
+   */
+   method void moveUp(int size) {
+      if (nativ > 1) {
+         do erase();
+         let y = y - size;
+         do draw();
+         let nativ = nativ - 1;
+      }
+      return;
+   }
+
+
+   /** 
+   * Moves the ball left by 2 pixels. 
+   */
+   method void moveLeft() {
+      if (x > 1) {
+         do Screen.setColor(false);
+         do Screen.drawRectangle((x + size) - 1, y, x + size, y + size);
+         let x = x - 2;
+         do Screen.setColor(true);
+         do Screen.drawRectangle(x, y, x + 1, y + size);
+      }
+      return;
+   }
+
+   /** 
+   Moves the ball right by 2 pixels. 
+   */
+   method void moveRight() {
+      if ((x + size) < 510) {
+         do Screen.setColor(false);
+         do Screen.drawRectangle(x, y, x + 1, y + size);
+         let x = x + 2;
+         do Screen.setColor(true);
+         do Screen.drawRectangle((x + size) - 1, y, x + size, y + size);
+      }
+      return;
+   }
+}

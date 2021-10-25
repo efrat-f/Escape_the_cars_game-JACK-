@@ -1,0 +1,83 @@
+/**
+ * Implements the game.
+ * Creates a ball game for each level of the game
+ * Each level of speed of the game increases
+ * Moves from level to level when the player has succeeded the previous level
+ * You can fail up to 3 times in each level, after 3 times the game stops
+ */
+class Games {
+    
+    //one ball game
+    field BallGame ballGame;
+
+    field int length, width, x, y, speed;
+
+    /**
+    * Constructs a new Game.
+    * Give coordinates, width and length of game board and start speed(sum levels = speed - 1).
+    */
+    constructor Games new(int Ax, int Ay, int Awidth, int Alength, int Aspeed) {
+        
+        //assigments
+        let speed = Aspeed;
+        let length = Alength;
+        let width = Awidth;
+        let x = Ax;
+        let y = Ay;
+        
+        return this;
+    }
+
+    /**
+    * run the game
+    * create board according to the parameters received by the constructor
+    * creat one ball game start level
+    * after failur creat new ball game till 3 failurs(then return)
+    * after success create new game with next level
+    * after success all levels print " you win!!"
+    */
+    method void run(){
+        var int level, lives;
+        var boolean success;
+        let level = 1;
+        let lives = 0;
+        do Screen.setColor(true);
+        do Screen.drawLine(x, y+40, x + width, y+40);
+        do Screen.drawLine(x, y + length - 40, x + width, y + length - 40);
+        while((level < speed) & (lives < 3)){
+            let ballGame = BallGame.new(x, y + 40, width, length - 80, length/11-2, x + ((width/9)/2));
+            do Output.moveCursor(y + 1, x + 1);
+            do Output.printString("Move the ball between the lanes by the arrow keys so that it is not run over by the cars.");
+            do Output.moveCursor(length/11-2, x + 1);
+            do Output.printString("level:");
+            do Output.moveCursor(length/11-2, x + 1 + 7);
+            do Output.printInt(level);
+            do Output.moveCursor(length/11-2, x + (width/9) - 1);
+            do Output.printString("lives: ");
+            do Output.moveCursor((length/11)-2, x + (width/9)  + 6);
+            do Output.printInt(3 - lives);
+            let success =  ballGame.run(speed - level, 15);
+            if(success){
+                let level = level +1;
+                let lives = 0;
+            }else{
+                let lives = lives + 1;
+            }
+            do ballGame.dispose();
+        }
+        do Screen.setColor(false);
+        do Screen.drawRectangle(x, y, width, length);
+        do Output.moveCursor(11, 27);
+        do Output.printString("you win!!");
+        return;
+    }
+
+    /** 
+    * Disposes this game.
+    */
+    method void dispose(){
+        //Uses an OS routine to recycle this object.
+        do Memory.deAlloc(this);
+        return;
+    }
+}
